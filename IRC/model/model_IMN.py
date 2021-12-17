@@ -35,8 +35,10 @@ def load_word_embeddings(vocab, dim):
         else:
             count = count + 1
             print("word {} is not present in the embedding document".format(word))
+        
+        # Adjusted
         #else:
-        #    embeddings[code] = np.random.uniform(-0.25, 0.25, dim)
+            embeddings[code] = np.random.uniform(-0.25, 0.25, dim)
 
     # Added
     print("{} of {} words are not present in the embedding document".format(count, len(vocab)))
