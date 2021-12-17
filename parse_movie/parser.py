@@ -18,15 +18,15 @@ responses = open("./responses.txt", "w")
 
 vocab = open("./vocab.txt", "w")
 
-train_lines = json.load(train_context)
-valid_lines = json.load(valid_context)
-test_lines = json.load(test_context)
+train_lines = json.load(train_source)
+valid_lines = json.load(valid_source)
+test_lines = json.load(test_source)
 
 train_dials = []
 valid_dials = []
 test_dials = []
 
-for line in train_lines:
+for line in train_lines[:7000]:
     dial = ['{}: {}'.format(turn["speaker"], turn["utterance"]) for turn in line]
 #     print(line)
     try:
@@ -36,7 +36,7 @@ for line in train_lines:
         print("Detected unicode that is not parsable")
         continue
 
-for line in valid_lines:
+for line in valid_lines[:200]:
     dial = ['{}: {}'.format(turn["speaker"], turn["utterance"]) for turn in line]
     try:
         dial = [word_tokenize(t.strip().lower()) for t in dial]
@@ -45,7 +45,7 @@ for line in valid_lines:
         print("Detected unicode that is not parsable")
         continue
 
-for line in test_lines:
+for line in test_lines[:200]:
     dial = ['{}: {}'.format(turn["speaker"], turn["utterance"]) for turn in line]
     try:
         dial = [word_tokenize(t.strip().lower()) for t in dial]
