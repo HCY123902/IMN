@@ -1,4 +1,9 @@
 import random
+import nltk
+
+nltk.download('punkt')
+
+from nltk.tokenize import word_tokenize
 
 train_source = open("./train_dial.txt", "r")
 valid_source = open("./valid_dial.txt", "r")
@@ -22,18 +27,31 @@ test_dials = []
 
 for line in train_lines:
     dial = line.split("__eou__")[:-1]
-    dial = [t.strip().lower() for t in dial]
-    train_dials.append(dial)
+#     print(line)
+    try:
+        dial = [word_tokenize(t.strip().lower()) for t in dial]
+        train_dials.append(dial)
+    except UnicodeDecodeError:
+        print("Detected unicode that is not parsable")
+        continue
 
 for line in valid_lines:
     dial = line.split("__eou__")[:-1]
-    dial = [t.strip().lower() for t in dial]
-    valid_dials.append(dial)
+    try:
+        dial = [word_tokenize(t.strip().lower()) for t in dial]
+        valid_dials.append(dial)
+    except UnicodeDecodeError:
+        print("Detected unicode that is not parsable")
+        continue
 
 for line in test_lines:
     dial = line.split("__eou__")[:-1]
-    dial = [t.strip().lower() for t in dial]
-    test_dials.append(dial)
+    try:
+        dial = [word_tokenize(t.strip().lower()) for t in dial]
+        test_dials.append(dial)
+    except UnicodeDecodeError:
+        print("Detected unicode that is not parsable")
+        continue
 
 train_context_dial = []
 valid_context_dial = []
@@ -47,7 +65,7 @@ for dial in train_dials:
         response_text.append(dial[-1])
 
         if len(dial) >= 7:
-            assert dial[5] != dial[-1]
+#             assert dial[5] != dial[-1]
             train_context_dial.append({"text": dial[:5], "response": len(response_text)})
             response_text.append(dial[5])
 
@@ -57,7 +75,7 @@ for dial in valid_dials:
         response_text.append(dial[-1])
 
         if len(dial) >= 7:
-            assert dial[5] != dial[-1]
+#             assert dial[5] != dial[-1]
             valid_context_dial.append({"text": dial[:5], "response": len(response_text)})
             response_text.append(dial[5])
 
@@ -67,7 +85,7 @@ for dial in test_dials:
         response_text.append(dial[-1])
 
         if len(dial) >= 7:
-            assert dial[5] != dial[-1]
+#             assert dial[5] != dial[-1]
             test_context_dial.append({"text": dial[:5], "response": len(response_text)})
             response_text.append(dial[5])
 
@@ -77,32 +95,34 @@ random.shuffle(test_context_dial)
 
 sample_range = range(len(response_text))
 
-for i, context_map in train_context_dial:
-    negavtive_sample = random.sample(sample_range)[0]
-    if negavtive_sample == context_map["response"]:
-        negavtive_sample = (context_map["response"] + 1) % len(response_text)
-    context = context_map["text"].join(" _eos_ ")
-    train_context.write("{}\t{} _eos_ \t{}\t{}\n", i, context, context_map["response"], negavtive_sample)
+for i, context_map in enumerate(train_context_dial):
+    negative_sample = random.sample(sample_range, 1)[0]
+    if negative_sample == context_map["response"]:
+        negative_sample = (context_map["response"] + 1) % len(response_text)
+    context = " _eos_ ".join([' '.join(tokens) for tokens in context_map["text"]])
+    train_context.write("{}\t{} _eos_ \t{}\t{}\n".format(i, context, context_map["response"], negative_sample))
 
-for i, context_map in valid_context_dial:
-    negavtive_sample = random.sample(sample_range, 9)
-    for j, sample in enumerate(negavtive_sample):
+for i, context_map in enumerate(valid_context_dial):
+    negative_sample = random.sample(sample_range, 9)
+    for j, sample in enumerate(negative_sample):
         if sample == context_map["response"]:
-            negavtive_sample[j] = (context_map["response"] + 1) % len(response_text)
+            negative_sample[j] = (context_map["response"] + 1) % len(response_text)
     
-    context = context_map["text"].join(" _eos_ ")
-    negavtive_response = negavtive_sample.join("|")
-    valid_context.write("{}\t{} _eos_ \t{}\t{}\n", i, context, context_map["response"], negavtive_response)
+    context = " _eos_ ".join([' '.join(tokens) for tokens in context_map["text"]])
+    negative_sample = [str(n) for n in negative_sample]
+    negative_response = "|".join(negative_sample)
+    valid_context.write("{}\t{} _eos_ \t{}\t{}\n".format(i, context, context_map["response"], negative_response))
 
-for i, context_map in test_context_dial:
-    negavtive_sample = random.sample(sample_range, 9)
-    for j, sample in enumerate(negavtive_sample):
+for i, context_map in enumerate(test_context_dial):
+    negative_sample = random.sample(sample_range, 9)
+    for j, sample in enumerate(negative_sample):
         if sample == context_map["response"]:
-            negavtive_sample[j] = (context_map["response"] + 1) % len(response_text)
+            negative_sample[j] = (context_map["response"] + 1) % len(response_text)
     
-    context = context_map["text"].join(" _eos_ ")
-    negavtive_response = negavtive_sample.join("|")
-    test_context.write("{}\t{} _eos_ \t{}\t{}\n", i, context, context_map["response"], negavtive_response)
+    context = " _eos_ ".join([' '.join(tokens) for tokens in context_map["text"]])
+    negative_sample = [str(n) for n in negative_sample]
+    negative_response = "|".join(negative_sample)
+    test_context.write("{}\t{} _eos_ \t{}\t{}\n".format(i, context, context_map["response"], negative_response))
 
 
 train_context.close()
@@ -110,8 +130,8 @@ valid_context.close()
 test_context.close()
 
 print("There are {} reponses captured".format(len(response_text)))
-for i, text in enumerate(response_text):
-    responses.write("{}\t{}", i, text)
+for i, tokens in enumerate(response_text):
+    responses.write("{}\t{}\n".format(i, ' '.join(tokens)))
 responses.close()
 
 vocab_count = {}
@@ -119,33 +139,38 @@ vocab_dict = {}
 vocab_dict['unk'] = 0
 
 for dial in train_dials:
-    for utt in dial:
-        tokens = dial.split(' ')
+    for tokens in dial:
+#         tokens = tokens.split(' ')
         for token in tokens:
             if len(tokens) > 0:
-                vocab_count[token] = vocab_count[token] + 1
+                vocab_count[token] = 1 if token not in vocab_count else vocab_count[token] + 1
 
 for dial in valid_dials:
-    for utt in dial:
-        tokens = dial.split(' ')
+    for tokens in dial:
+#         tokens = utt.split(' ')
         for token in tokens:
-            if len(tokens) > 0:
-                vocab_count[token] = vocab_count[token] + 1
+            if len(token) > 0:
+#                 if len(token) > 1 and token[-1] in ['.', ',', ':', '?', ';', '!', '']:
+#                     punctuation = token[-1]
+#                     vocab_count[punctuation] = 1 if token not in vocab_count else vocab_count[token] + 1
+#                     token = token[:-1]
+                vocab_count[token] = 1 if token not in vocab_count else vocab_count[token] + 1
 
 for dial in test_dials:
-    for utt in dial:
-        tokens = dial.split(' ')
+    for tokens in dial:
+#         tokens = utt.split(' ')
         for token in tokens:
-            if len(tokens) > 0:
-                vocab_count[token] = vocab_count[token] + 1
+            if len(token) > 0:
+                vocab_count[token] = 1 if token not in vocab_count else vocab_count[token] + 1
     
-for token, count in vocab_count:
-    if count > 1:
+for token, count in vocab_count.items():
+    if count > 1 and len(token) > 0:
         vocab_dict[token] = len(vocab_dict)
 
+for token, position in vocab_dict.items():
+    vocab.write("{}\t{}\n".format(token, position))
 
-
-
+vocab.close()
 
 train_source.close()
 valid_source.close()
