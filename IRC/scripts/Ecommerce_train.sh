@@ -1,31 +1,31 @@
 cur_dir=`pwd`
 parentdir="$(dirname $cur_dir)"
 
-DATA_DIR=${parentdir}/data/Ecommerce_Corpus
+DATA_DIR=${parentdir}/data
 
 train_file=$DATA_DIR/train.txt
 valid_file=$DATA_DIR/valid.txt
 test_file=$DATA_DIR/test.txt
 response_file=$DATA_DIR/responses.txt
 vocab_file=$DATA_DIR/vocab.txt
-embedded_vector_file=$DATA_DIR/tencent_200_plus_word2vec_200.txt
+embedded_vector_file=$DATA_DIR/glove.twitter.27B.200d.txt
 
 max_utter_len=50
 max_utter_num=10
 max_response_len=50
 num_layer=3
-DIM=400
+DIM=200
 rnn_size=200
 
 batch_size=128
 lambda=0
 dropout_keep_prob=0.8
-num_epochs=10
+num_epochs=30
 evaluate_every=1000
 
 PKG_DIR=${parentdir}
 
-PYTHONPATH=${PKG_DIR}:$PYTHONPATH CUDA_VISIBLE_DEVICES=1 python -u ${PKG_DIR}/model/train.py \
+PYTHONPATH=${PKG_DIR}:$PYTHONPATH CUDA_VISIBLE_DEVICES=7 python -u ${PKG_DIR}/model/train.py \
                 --train_file $train_file \
                 --valid_file $valid_file \
                 --test_file $test_file \
@@ -42,4 +42,4 @@ PYTHONPATH=${PKG_DIR}:$PYTHONPATH CUDA_VISIBLE_DEVICES=1 python -u ${PKG_DIR}/mo
                 --l2_reg_lambda $lambda \
                 --dropout_keep_prob $dropout_keep_prob \
                 --num_epochs $num_epochs \
-                --evaluate_every $evaluate_every > log_train_IMN_Ecommerce.txt 2>&1 &
+                --evaluate_every $evaluate_every
