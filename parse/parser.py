@@ -102,8 +102,10 @@ for i, context_map in enumerate(train_context_dial):
     context = " _eos_ ".join([' '.join(tokens) for tokens in context_map["text"]])
     train_context.write("{}\t{} _eos_ \t{}\t{}\n".format(i, context, context_map["response"], negative_sample))
 
+number_of_samples = 29
+
 for i, context_map in enumerate(valid_context_dial):
-    negative_sample = random.sample(sample_range, 9)
+    negative_sample = random.sample(sample_range, number_of_samples)
     for j, sample in enumerate(negative_sample):
         if sample == context_map["response"]:
             negative_sample[j] = (context_map["response"] + 1) % len(response_text)
@@ -114,7 +116,7 @@ for i, context_map in enumerate(valid_context_dial):
     valid_context.write("{}\t{} _eos_ \t{}\t{}\n".format(i, context, context_map["response"], negative_response))
 
 for i, context_map in enumerate(test_context_dial):
-    negative_sample = random.sample(sample_range, 9)
+    negative_sample = random.sample(sample_range, number_of_samples)
     for j, sample in enumerate(negative_sample):
         if sample == context_map["response"]:
             negative_sample[j] = (context_map["response"] + 1) % len(response_text)

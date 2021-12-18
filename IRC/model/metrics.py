@@ -121,3 +121,16 @@ def classification_metrics(results):
     recall    = float(positive_correct)/true_positive
     F1 = 2.0 * precision * recall/(1e-12+precision + recall)
     return accuracy, precision, recall, F1, loss/total_num;
+
+def recall(results, k):
+    true_positive = 0
+    total_positive = 0
+
+    for i, v in results.items():
+        sorted_v = sorted(v, key=operator.itemgetter(2), reverse=True)
+        for aid, label, score in sorted_v[:k]:
+            if label > 0:
+                true_positive = true_positive + 1
+            total_positive = total_positive + 1
+
+    return float(true_positive) / float(total_positive) 

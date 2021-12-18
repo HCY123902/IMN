@@ -184,6 +184,14 @@ with tf.Graph().as_default():
             accu, precision, recall, f1, loss = metrics.classification_metrics(results)
             print('Accuracy: {}, Precision: {}  Recall: {}  F1: {} Loss: {}'.format(accu, precision, recall, f1, loss))
 
+            # Added
+            recall_at_1 = metrics.recall(results, 1)
+            recall_at_3 = metrics.recall(results, 3)
+            recall_at_5 = metrics.recall(results, 5)
+            recall_at_10 = metrics.recall(results, 10)
+
+            print("Recall at 1: {}, Recall at 3: {}, Recall at 5: {}, Recall at 10: {}".format(recall_at_1, recall_at_3, recall_at_5, recall_at_10))
+
             mvp = metrics.mean_average_precision(results)
             mrr = metrics.mean_reciprocal_rank(results)
             top_1_precision = metrics.top_1_precision(results)
@@ -223,6 +231,14 @@ with tf.Graph().as_default():
             print('num_test_samples: {}  test_accuracy: {}'.format(num_test, num_correct/num_test))
             accu, precision, recall, f1, loss = metrics.classification_metrics(results)
             print('Accuracy: {}, Precision: {}  Recall: {}  F1: {} Loss: {}'.format(accu, precision, recall, f1, loss))
+
+            # Added
+            recall_at_1 = metrics.recall(results, 1)
+            recall_at_3 = metrics.recall(results, 3)
+            recall_at_5 = metrics.recall(results, 5)
+            recall_at_10 = metrics.recall(results, 10)
+
+            print("Recall at 1: {}, Recall at 3: {}, Recall at 5: {}, Recall at 10: {}".format(recall_at_1, recall_at_3, recall_at_5, recall_at_10))
 
             mvp = metrics.mean_average_precision(results)
             mrr = metrics.mean_reciprocal_rank(results)
