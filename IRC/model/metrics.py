@@ -131,6 +131,6 @@ def recall(results, k):
         for aid, label, score in sorted_v[:k]:
             if label > 0:
                 true_positive = true_positive + 1
-            total_positive = total_positive + 1
+        total_positive = total_positive + 1
 
     return float(true_positive) / float(total_positive) 
